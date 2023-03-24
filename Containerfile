@@ -12,7 +12,8 @@ COPY --from=docker.io/mikefarah/yq /usr/bin/yq /usr/bin/yq
 
 RUN rpm-ostree override remove firefox firefox-langpacks
 
-RUN echo "-- Installing RPMs defined in recipe.yml --" && \
+RUN pip install --prefix=/usr yafti && \
+    echo "-- Installing RPMs defined in recipe.yml --" && \
     rpm_packages=$(yq '.rpms[]' < /etc/ublue-recipe.yml) && \
     for pkg in $rpm_packages; do \
         echo "Installing: ${pkg}" && \
