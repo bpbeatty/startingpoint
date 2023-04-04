@@ -31,7 +31,8 @@ jobs:
       fail-fast: false
       matrix:
         recipe:
-          - recipe.yml
+          - recipe-workstation.yml
+          - recipe-simsulator.yml
 
     steps:
       # Checkout push-to-registry action GitHub repository
@@ -92,7 +93,7 @@ jobs:
           labels: |
             org.opencontainers.image.title=${{ env.IMAGE_NAME }}
             org.opencontainers.image.description=${{ env.IMAGE_DESCRIPTION }}
-            io.artifacthub.package.readme-url=https://raw.githubusercontent.com/ublue-os/startingpoint/main/README.md
+            io.artifacthub.package.readme-url=https://raw.githubusercontent.com/bpbeatty/startingpoint/main/README.md
             io.artifacthub.package.logo-url=https://avatars.githubusercontent.com/u/120078124?s=200&v=4
 
       # Build image using Buildah action

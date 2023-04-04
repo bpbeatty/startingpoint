@@ -1,6 +1,6 @@
 # Starting point
 
-[![build-ublue](https://github.com/ublue-os/startingpoint/actions/workflows/build.yml/badge.svg)](https://github.com/ublue-os/startingpoint/actions/workflows/build.yml)
+[![build-ublue](https://github.com/bpbeatty/startingpoint/actions/workflows/build.yml/badge.svg)](https://github.com/bpbeatty/startingpoint/actions/workflows/build.yml)
 
 This is a starting point Fedora Silverblue image designed to be customized to whatever you want, have GitHub build it for you, and then host it for you. You then just tell your computer to boot off of that image. GitHub keeps 90 days worth image backups for you, thanks Microsoft!
 
@@ -62,13 +62,13 @@ The files `/etc/profile.d/ublue-firstboot.sh` and `/etc/skel.d/.config/autostart
 To rebase an existing Silverblue/Kinoite installation to the latest build:
 
 ```
-sudo rpm-ostree rebase ostree-unverified-registry:ghcr.io/ublue-os/startingpoint:latest
+rpm-ostree rebase ostree-unverified-registry:ghcr.io/bpbeatty/startingpoint:latest
 ```
 
 This repository builds date tags as well, so if you want to rebase to a particular day's build:
 
 ```
-sudo rpm-ostree rebase ostree-unverified-registry:ghcr.io/ublue-os/startingpoint:20230403
+rpm-ostree rebase ostree-unverified-registry:ghcr.io/bpbeatty/startingpoint:20230403
 ```
 
 The `latest` tag will automatically point to the latest build. That build will still always use the Fedora version specified in `release.yml`, so you won't get accidentally updated to the next major version.
@@ -97,6 +97,6 @@ Check the [just website](https://just.systems) for tips on modifying and adding 
 
 These images are signed with sisgstore's [cosign](https://docs.sigstore.dev/cosign/overview/). You can verify the signature by downloading the `cosign.pub` key from this repo and running the following command:
 
-    cosign verify --key cosign.pub ghcr.io/ublue-os/startingpoint
+    cosign verify --key cosign.pub ghcr.io/bpbeatty/startingpoint
 
 If you're forking this repo, the uBlue website has [instructions](https://ublue.it/making-your-own/) for setting up signing properly.

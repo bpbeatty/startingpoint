@@ -12,6 +12,8 @@ COPY recipe.yml /tmp/ublue-recipe.yml
 # yq used in build.sh and the setup-flatpaks recipe to read the recipe.yml
 # copied from the official container image as it's not avaible as an rpm
 COPY --from=docker.io/mikefarah/yq /usr/bin/yq /usr/bin/yq
+COPY --from=ghcr.io/ublue-os/config:latest /files/ublue-os-udev-rules /
+COPY --from=ghcr.io/ublue-os/config:latest /files/ublue-os-update-services /
 
 # copy and run the build script
 COPY build.sh /tmp/build.sh
