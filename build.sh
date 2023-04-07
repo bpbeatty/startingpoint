@@ -1,5 +1,8 @@
 #!/bin/bash
 
+
+setsebool -P -N use_nfs_home_dirs=1 unconfined_mozilla_plugin_transition=0
+
 rpm-ostree override remove nano-default-editor
 
 echo "-- Installing RPMs defined in recipe.yml --"
