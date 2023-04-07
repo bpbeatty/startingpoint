@@ -23,3 +23,9 @@ flatpaks=$(yq '.flatpaks[]' < /tmp/ublue-recipe.yml)
 for pkg in $(echo -e "$flatpaks"); do \
     yq -i ".screens.applications.values.groups.Custom.packages += [{\"$pkg\": \"$pkg\"}]" /etc/yafti.yml
 done
+
+systemctl enable ratbagd.service
+systemctl enable remote-fs.target
+systemctl enable rpm-ostree-countme.service
+sed -i 's/#DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=15s/' /etc/systemd/user.conf
+sed -i 's/#DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=15s/' /etc/systemd/system.conf
