@@ -21,6 +21,7 @@ rpms:
   - clevis-dracut
   - clevis-udisks2
   - distrobox
+  - dvd+rw-tools
   - evolution
   - freeipa-client
   - libratbag-ratbagd
