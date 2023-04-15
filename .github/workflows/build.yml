@@ -7,7 +7,7 @@ on:
       - "**.md"
       - "**.txt"
   schedule:
-    - cron: "20 20 * * *" # 8:20pm everyday
+    - cron: "20 22 * * *" # 10:20pm everyday (1 hr delay after 'nvidia' builds)
   push:
     branches:
       - main
@@ -17,7 +17,6 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_BASE_NAME: startingpoint
   IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
 
 jobs:
@@ -31,20 +30,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image_name: [startingpoint]
-        major_version: [37]
-        include:
-          - major_version: 37
-            is_latest_version: true
-            is_stable_version: true
+        recipe:
+          - recipe-workstation.yml
+          - recipe-simsulator.yml
+
     steps:
       # Checkout push-to-registry action GitHub repository
       - name: Checkout Push to Registry action
         uses: actions/checkout@v3
 
-      - name: Matrix Variables
+      - name: Add yq for reading recipe.yml
+        uses: mikefarah/yq@v4.33.2
+
+      - name: Gather image data from recipe
         run: |
-          echo "IMAGE_NAME=${{ format('{1}', matrix.image_name, env.IMAGE_BASE_NAME) }}" >> $GITHUB_ENV
+          echo "IMAGE_NAME=$(yq '.name' ./${{ matrix.recipe }})" >> $GITHUB_ENV
+          echo "IMAGE_DESCRIPTION=$(yq '.description' ./${{ matrix.recipe }})" >> $GITHUB_ENV
+          echo "FEDORA_MAJOR_VERSION=$(yq '.fedora-version' ./${{ matrix.recipe }})" >> $GITHUB_ENV
+          echo "BASE_CONTAINER_URL=$(yq '.base-container' ./${{ matrix.recipe }})" >> $GITHUB_ENV
 
       - name: Generate tags
         id: generate-tags
@@ -52,26 +55,18 @@ jobs:
         run: |
           # Generate a timestamp for creating an image version history
           TIMESTAMP="$(date +%Y%m%d)"
-          MAJOR_VERSION="${{ matrix.major_version }}"
+          MAJOR_VERSION="${{ env.FEDORA_MAJOR_VERSION }}"
           COMMIT_TAGS=()
           BUILD_TAGS=()
           # Have tags for tracking builds during pull request
           SHA_SHORT="$(git rev-parse --short HEAD)"
           COMMIT_TAGS+=("pr-${{ github.event.number }}-${MAJOR_VERSION}")
           COMMIT_TAGS+=("${SHA_SHORT}-${MAJOR_VERSION}")
-          if [[ "${{ matrix.is_latest_version }}" == "true" ]] && \
-             [[ "${{ matrix.is_stable_version }}" == "true" ]]; then
-              COMMIT_TAGS+=("pr-${{ github.event.number }}")
-              COMMIT_TAGS+=("${SHA_SHORT}")
-          fi
 
           BUILD_TAGS=("${MAJOR_VERSION}" "${MAJOR_VERSION}-${TIMESTAMP}")
 
-          if [[ "${{ matrix.is_latest_version }}" == "true" ]] && \
-             [[ "${{ matrix.is_stable_version }}" == "true" ]]; then
-              BUILD_TAGS+=("${TIMESTAMP}")
-              BUILD_TAGS+=("latest")
-          fi
+          BUILD_TAGS+=("${TIMESTAMP}")
+          BUILD_TAGS+=("latest")
 
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
               echo "Generated the following commit tags: "
@@ -94,11 +89,11 @@ jobs:
         id: meta
         with:
           images: |
-            $IMAGE_NAME
+            ${{ env.IMAGE_NAME }}
           labels: |
-            org.opencontainers.image.title=$IMAGE_NAME
-            org.opencontainers.image.description=A $IMAGE_NAME image for further customization
-            io.artifacthub.package.readme-url=https://raw.githubusercontent.com/ublue-os/base/base/README.md
+            org.opencontainers.image.title=${{ env.IMAGE_NAME }}
+            org.opencontainers.image.description=${{ env.IMAGE_DESCRIPTION }}
+            io.artifacthub.package.readme-url=https://raw.githubusercontent.com/bpbeatty/startingpoint/main/README.md
             io.artifacthub.package.logo-url=https://avatars.githubusercontent.com/u/120078124?s=200&v=4
 
       # Build image using Buildah action
@@ -112,8 +107,9 @@ jobs:
           tags: |
             ${{ steps.generate-tags.outputs.alias_tags }}
           build-args: |
-            IMAGE_NAME=${{ matrix.image_name }}
-            FEDORA_MAJOR_VERSION=${{ matrix.major_version }}
+            FEDORA_MAJOR_VERSION=${{ env.FEDORA_MAJOR_VERSION }}
+            BASE_CONTAINER_URL=${{ env.BASE_CONTAINER_URL }}
+            RECIPE=${{ matrix.recipe }}
           labels: ${{ steps.meta.outputs.labels }}
           oci: false
 

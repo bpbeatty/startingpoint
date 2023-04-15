@@ -1,0 +1,42 @@
+# the image will be at ghcr.io/yourusername/name
+name: simsulator
+
+# what native container image to build on top of
+# images not built by ublue might function unexpectly
+base-container: ghcr.io/ublue-os/silverblue-nvidia
+
+# What fedora version to use. Use an explicit version or `latest`.
+# If you use `latest`, you will be automatically updated
+# to the next major version assuming the image you're using as your base container
+# builds with the tag (all uBlue images do this).
+fedora-version: 37
+
+# This description will be visible in the container metadata
+description: A starting point for further customization of uBlue images. Make your own! https://ublue.it/making-your-own/
+
+# These rpms will be installed from the fedora repository
+# using rpm-ostree and will be preinstalled in the final image
+rpms:
+  - clevis
+  - clevis-dracut
+  - clevis-udisks2
+  - evolution
+  - freeipa-client
+  - libratbag-ratbagd
+  - python3-pip # needed for yafti (the first boot installer)
+  - tcsh
+  - vim
+  - vim-default-editor
+
+# These Flatpaks (from flathub) will be available for install on boot
+# this is just an example selection.
+# If you leave this empty you can use yafti for post-boot installation
+flatpaks:
+  - com.github.tchx84.Flatseal
+  - im.riot.Riot
+  - io.freetubeapp.FreeTube
+  - org.freedesktop.Piper
+  - org.gustavoperedo.FontDownloader
+  - org.keepassxc.KeePassXC
+  - org.libreoffice.LibreOffice
+  - org.videolan.VLC

@@ -1,0 +1,31 @@
+#!/bin/bash
+
+
+setsebool -P -N use_nfs_home_dirs=1 unconfined_mozilla_plugin_transition=0
+
+rpm-ostree override remove nano-default-editor
+
+echo "-- Installing RPMs defined in recipe.yml --"
+rpm_packages=$(yq '.rpms[]' < /tmp/ublue-recipe.yml)
+for pkg in $(echo -e "$rpm_packages"); do \
+    echo "Installing: ${pkg}" && \
+    rpm-ostree install $pkg; \
+done
+echo "---"
+
+# install yafti to install flatpaks on first boot, https://github.com/ublue-os/yafti
+pip install --prefix=/usr yafti
+
+# add a package group for yafti using the packages defined in recipe.yml
+yq -i '.screens.applications.values.groups.Custom.description = "Flatpaks defined by the image maintainer"' /etc/yafti.yml
+yq -i '.screens.applications.values.groups.Custom.default = true' /etc/yafti.yml
+flatpaks=$(yq '.flatpaks[]' < /tmp/ublue-recipe.yml)
+for pkg in $(echo -e "$flatpaks"); do \
+    yq -i ".screens.applications.values.groups.Custom.packages += [{\"$pkg\": \"$pkg\"}]" /etc/yafti.yml
+done
+
+systemctl enable ratbagd.service
+systemctl enable remote-fs.target
+systemctl enable rpm-ostree-countme.service
+sed -i 's/#DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=15s/' /etc/systemd/user.conf
+sed -i 's/#DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=15s/' /etc/systemd/system.conf
