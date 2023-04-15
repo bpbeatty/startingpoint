@@ -8,7 +8,6 @@ ARG RECIPE
 COPY etc /etc
 # COPY usr /usr
 
-COPY ublue-firstboot /usr/bin
 COPY ${RECIPE} /tmp/ublue-recipe.yml
 
 # yq used in build.sh and the setup-flatpaks recipe to read the recipe.yml
