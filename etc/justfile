@@ -62,3 +62,6 @@ update:
   rpm-ostree update
   flatpak update -y
   distrobox upgrade -a
+
+yafti:
+  yafti /etc/yafti.yml
