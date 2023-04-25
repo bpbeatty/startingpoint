@@ -1,9 +1,17 @@
 #!/bin/bash
 
-
 setsebool -P -N use_nfs_home_dirs=1 unconfined_mozilla_plugin_transition=0
 
 rpm-ostree override remove nano-default-editor
+
+# run scripts
+echo "-- Running scripts defined in recipe.yml --"
+buildscripts=$(yq '.scripts[]' < /tmp/ublue-recipe.yml)
+for script in $(echo -e "$buildscripts"); do \
+    echo "Running: ${script}" && \
+    /tmp/scripts/$script; \
+done
+echo "---"
 
 echo "-- Installing RPMs defined in recipe.yml --"
 rpm_packages=$(yq '.rpms[]' < /tmp/ublue-recipe.yml)
